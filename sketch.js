@@ -1,119 +1,142 @@
-class FlowLine {
+class FlowLine { 
   constructor(startX, startY, speed, hue) {
-    this.holdMin = 70;
-    this.holdMax = 90;
-    this.startX = startX;
-    this.startY = startY;
-    this.flPointsAll = [];
-    this.flPoint = {x: this.startX, y: this.startY};
-    this.flSpeed = speed; // positiv to the right, negativ to the left
-    this.straightDir = true;
-    this.flWhere = 'horiz';
-    this.hue = hue;
-    this.transp = 100;
-    this.flCounter = 0;
+    this.holdMin = 70;      // minimal Time before switch direction
+    this.holdMax = 90;      // minimal Time before switch direction
+    this.startX = startX;   // 1: Startpoint X to trigger (Mouse or ML)
+    this.startY = startY;   // 2: Startpoint Y to trigger (Mouse or ML)
+    this.flPointsAll = [];  // Array for all points in Flowline
+    this.flPoint = {x: this.startX, y: this.startY}; // Object with x and y position
+    this.flSpeed = speed;   // 3: positiv to the right, negativ to the left
+    this.straightDir = true; // Direction true if horizontal; default for all
+    this.flWhere = 'horiz';   // Direction true if horizontal; default for array
+    this.hue = hue;         // 4: Hue value for Line
+    this.satValue = 100;    // set saturation value
+    this.briValue = 100;    // set brightness value
+    this.transp = 100;      // default transparency, reduce by end of life
+    this.flCounter = 0;     // counter to trigger behavior, instead of frameCount
   }
   show() { // draw FlowLine
     noFill();
-    stroke(this.hue, 100, 100, this.transp)
-    strokeWeight(flowWeight)
+    stroke(this.hue, this.satValue, this.briValue, this.transp)
+    strokeWeight(flowWeight) // variable before setup
     beginShape();
-    vertex(this.startX, this.startY)
-    this.flPointsAll.forEach(point => vertex(this.flPoint.x, this.flPoint.y))
+    vertex(this.startX, this.startY) // set first/trigger point
+    this.flPointsAll.forEach(point => vertex(this.flPoint.x, this.flPoint.y)) // loop trough array with points
     endShape();
-    // console.log(this.flPoint)
   }
-  addPoint(x, y) { // Push vertex X and Y in Array
-    this.flPointsAll.push(this.flPoint);
-  }
-  behavior() { // Set flow behavior
-
-    this.holdDir = int(random(this.holdMin, this.holdMax))
-    this.switchDir = ['horiz', 'up', 'down']
-    this.counter = this.flCounter % this.holdDir
-    this.flCounter += 1
-
+  behavior() { // Set flow behavior and then add points
+    
+    this.holdDir = int(random(this.holdMin, this.holdMax)) // hold direction time
+    this.switchDir = ['horiz', 'up', 'down'] // possible directions
+    this.counter = this.flCounter % this.holdDir // counter for switch direction
+    this.flCounter += 1 // increase counter
+    
     // Flow Horizontal, up or down
     if (this.counter == this.holdDir-1 && this.straightDir == true) {
-      this.flWhere = this.switchDir[int(random(1, 3))]
+      this.flWhere = this.switchDir[int(random(1, 3))] // choose between up or down
       this.straightDir = false
     } else if (this.counter == this.holdDir-1 && this.straightDir == false) {
-      this.flWhere = this.switchDir[0]
+      this.flWhere = this.switchDir[0] // stay horizontal
       this.straightDir = true
     } else {
-      this.switchDir[0]
+      this.switchDir[0] // default behavior for safety 
+    }
+
+    // Add Points to array FIXME:
+    if (this.counter == 0) { // everytime the counter restarts...
+      this.flPointsAll.push(this.flPoint); // ...ad new points to array
     }
   }
-  move() { // move Points
+  // --> old methode for addpoints, moved to "behavior" for the counter
+  // addPoint(x, y) { // Push vertex X and Y in Array
+  // }
+  move() { // move Points, speed can by positiv (to right) or negativ (to left)
     if (this.flWhere == 'horiz') {
-      this.flPoint.x  = this.flPoint.x + this.flSpeed
+      this.flPoint.x  += this.flSpeed
     } else if (this.flWhere == 'up') {
-      this.flPoint.x  = this.flPoint.x + this.flSpeed
-      this.flPoint.y  = this.flPoint.y - this.flSpeed
+      this.flPoint.x  += this.flSpeed
+      this.flPoint.y  -= this.flSpeed
     } else if (this.flWhere == 'down') {
-      this.flPoint.x  = this.flPoint.x + this.flSpeed
-      this.flPoint.y  = this.flPoint.y + this.flSpeed
+      this.flPoint.x  += this.flSpeed
+      this.flPoint.y  += this.flSpeed
     }
   }
   remove() {
     if (this.flPoint.x<0||this.flPoint.x>width || this.flPoint.y<0||this.flPoint.y>height){
-      this.transp -= flowRemoveSpeed
+      this.transp -= flowRemoveSpeed // reduce transparency if points reach borders
     }
     if (this.transp < 0) {
-      // remove from Array HIER NOCH EINBAUEN
+      // remove Array HIER NOCH EINBAUEN
     }
   }
 }
-// ENDE der Klasse FlowLine
+// END of class "FlowLine", here for checking properties
 // class FlowLine {
 //   constructor(startX, startY, speed, hue) {
 
-let flowSpeed;
-let flowWeight = 2;
-let flowRemoveSpeed = 1;
-let hueValue;
+// --- variables for finetuning on stage
+let flowSpeed;            // speed for FlowLine, can be pos or neg, change in mouse pressed
+let flowWeight = 2;       // stroke thickness
+let flowRemoveSpeed = 1;  // how fast the lines disapear when reaching borders
+let hueValue;             // hue value in "draw" for random set
 
+const colorfulls = [
+  "5",    //#d53829
+  "15",   //#ff541b
+  "42",   //#e6ae2e
+  "89",   //#80a25c
+  "161",  //#009f6c
+  "219",  //#387eff
+  "258",  //#4e22b6
+  "326",  //#ff2ea5
+];
+const colorAchro = [
+  "198",  //#e7eef1
+  "48"    //#1b1a16
+];
 
-console.log(flowSpeed)
+const flowLines = []      // array for flowLines 
 
-const flowLines = []
-function mousePressed() {
-  if (Math.random() < 0.5) {
-    flowSpeed = -2;
+// --- Version with start of FlowLine by mouse click
+function mousePressed() { // 
+  if (Math.random() < 0.5) { // random switch right or left side
+    flowSpeed = -2; // change here for adjusting speed
   } else {
-    flowSpeed = 2;
+    flowSpeed = 2;  // change here for adjusting speed, same value as above!
   }
   console.log(flowSpeed)
-  flowLines.push(new FlowLine(mouseX, mouseY, flowSpeed, hueValue))
+  
+  // push class FlowLine in array
+  flowLines.push(new FlowLine(mouseX, mouseY, flowSpeed, hueValue)) 
 }
 
 function setup() {
-  colorMode(HSB, 360, 100, 100, 100);
-  createCanvas(windowWidth, 600);
-  // push()
-  // noFill()
-  // stroke(0)
-  // strokeWeight(1)
-  // rect(0, 0, width, height)
-  // pop()
+  colorMode(HSB, 360, 100, 100, 100); // set colormode to HSB
+  createCanvas(windowWidth, 600);     // change on stage
 }
 
 function draw() {
-  background(180, 20, 100, 100);
-  hueValue = random(280, 360)
+  background(198, 4, 95, 100);      // Background color
+  // Color Random or from array (comment out)
+  hueValue = random(280, 360)         // Random color for Flowline
+
+  const pick = (d) => d[Math.floor(random() * d.length)];
+  hueValue = pick(colorfulls)
+
+
 
   for (let flowLine of flowLines) {
-    flowLine.addPoint()
-    flowLine.show()
     flowLine.behavior()
+    flowLine.show()
     flowLine.move()
     flowLine.remove()
   }
 }
 
 
-// NOCH LÖSEN:
-// - Vertex macht pro wechsel einen neuen Punkt
+// TODO:
+// -- Vertex macht pro wechsel einen neuen Punkt! PRIO 1 / Schwierigste?
 // - Linie verblasst vom Start her (Schweif-Effekt)
-// - Ausgelöst durch ML Skeleton Trigger
-// - ML Skeleton erkennt Richtung
+// - Array mit Farben anstatt Random
+// - Ausgelöst durch ML Skeleton Trigger. Kann ich glaub kopieren von altem Projekt
+// - ML Skeleton erkennt Richtung. Kann ich glaub kopieren von altem Projekt
