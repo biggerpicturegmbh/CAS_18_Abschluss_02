@@ -120,7 +120,7 @@ function draw() {
   // Color Random or from array (comment out)
   hueValue = random(280, 360)         // Random color for Flowline
 
-  const pick = (d) => d[Math.floor(random() * d.length)];
+  const pick = (d) => d[floor(random() * d.length)];
   hueValue = pick(colorfulls)
 
 
@@ -137,6 +137,5 @@ function draw() {
 // TODO:
 // -- Vertex macht pro wechsel einen neuen Punkt! PRIO 1 / Schwierigste?
 // - Linie verblasst vom Start her (Schweif-Effekt)
-// - Array mit Farben anstatt Random
 // - Ausgelöst durch ML Skeleton Trigger. Kann ich glaub kopieren von altem Projekt
 // - ML Skeleton erkennt Richtung. Kann ich glaub kopieren von altem Projekt
