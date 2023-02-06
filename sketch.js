@@ -1,6 +1,6 @@
 class FlowLine { 
   constructor(startX, startY, speed, hue) {
-    this.holdMin = 70;      // minimal Time before switch direction
+    this.holdMin = 30;      // minimal Time before switch direction
     this.holdMax = 90;      // minimal Time before switch direction
     this.startX = startX;   // 1: Startpoint X to trigger (Mouse or ML)
     this.startY = startY;   // 2: Startpoint Y to trigger (Mouse or ML)
@@ -19,9 +19,10 @@ class FlowLine {
     noFill();
     stroke(this.hue, this.satValue, this.briValue, this.transp)
     strokeWeight(flowWeight) // variable before setup
+    // FIXME: Glaub das muss ich umbauen
     beginShape();
     vertex(this.startX, this.startY) // set first/trigger point
-    this.flPointsAll.forEach(point => vertex(this.flPoint.x, this.flPoint.y)) // loop trough array with points
+    this.flPointsAll.forEach(point => vertex(point.x, point.y)) // loop trough array with points
     endShape();
   }
   behavior() { // Set flow behavior and then add points
@@ -42,7 +43,7 @@ class FlowLine {
       this.switchDir[0] // default behavior for safety 
     }
 
-    // Add Points to array FIXME:
+    // FIXME: Glaub das muss ich umbauen
     if (this.counter == 0) { // everytime the counter restarts...
       this.flPointsAll.push(this.flPoint); // ...ad new points to array
     }
@@ -100,9 +101,9 @@ const flowLines = []      // array for flowLines
 // --- Version with start of FlowLine by mouse click
 function mousePressed() { // 
   if (Math.random() < 0.5) { // random switch right or left side
-    flowSpeed = -2; // change here for adjusting speed
+    flowSpeed = -1; // change here for adjusting speed
   } else {
-    flowSpeed = 2;  // change here for adjusting speed, same value as above!
+    flowSpeed = 1;  // change here for adjusting speed, same value as above!
   }
   console.log(flowSpeed)
   
